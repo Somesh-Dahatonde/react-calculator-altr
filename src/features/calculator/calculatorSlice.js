@@ -6,6 +6,8 @@ const initialState = {
   operation: null,
   waitingForNewValue: false,
   error: null,
+  lastInputValue: null,
+  lastOperation: null,
 };
 
 const performCalculation = (prev, current, operation) => {
@@ -147,6 +149,10 @@ const calculatorSlice = createSlice({
     calculate: (state) => {
       const inputValue = parseFloat(state.display);
 
+      // We need to store these values in the state for repeat functionality
+      if (!state.lastInputValue) state.lastInputValue = null;
+      if (!state.lastOperation) state.lastOperation = null;
+
       // Handle error state
       if (state.display === "Error") {
         return;
@@ -164,6 +170,10 @@ const calculatorSlice = createSlice({
 
       if (state.previousValue !== null && state.operation) {
         try {
+          // Store the current operation and right operand for repeat functionality
+          state.lastOperation = state.operation;
+          state.lastInputValue = inputValue;
+
           const result = performCalculation(
             state.previousValue,
             inputValue,
@@ -176,7 +186,7 @@ const calculatorSlice = createSlice({
           }
 
           state.display = formatDisplayValue(result);
-          state.previousValue = null;
+          state.previousValue = result; // Keep the result for chained operations
           state.operation = null;
           state.waitingForNewValue = true;
           state.error = null;
@@ -186,6 +196,35 @@ const calculatorSlice = createSlice({
           state.previousValue = null;
           state.operation = null;
           state.waitingForNewValue = true;
+          state.lastOperation = null;
+          state.lastInputValue = null;
+        }
+      } else if (state.lastOperation && state.lastInputValue !== null) {
+        // Handle repeated equals press
+        try {
+          const result = performCalculation(
+            parseFloat(state.display),
+            state.lastInputValue,
+            state.lastOperation
+          );
+
+          // Check for invalid results
+          if (!isFinite(result)) {
+            throw new Error("Result is too large");
+          }
+
+          state.display = formatDisplayValue(result);
+          state.previousValue = result;
+          state.waitingForNewValue = true;
+          state.error = null;
+        } catch (error) {
+          state.error = error.message;
+          state.display = "Error";
+          state.previousValue = null;
+          state.operation = null;
+          state.waitingForNewValue = true;
+          state.lastOperation = null;
+          state.lastInputValue = null;
         }
       }
     },
@@ -195,8 +234,31 @@ const calculatorSlice = createSlice({
     },
 
     clearEntry: (state) => {
-      state.display = "0";
-      state.error = null;
+      // If the display is showing an error, clear it
+      if (state.display === "Error") {
+        state.display = "0";
+        state.error = null;
+        return;
+      }
+
+      // If waiting for a new value after an operation, just clear the entry
+      if (state.waitingForNewValue === false && state.operation) {
+        state.display = "0";
+        return;
+      }
+
+      // Toggle sign (plus/minus functionality)
+      if (state.display !== "0") {
+        // If the current display is not "0", toggle the sign
+        if (state.display.startsWith("-")) {
+          state.display = state.display.substring(1); // Remove the minus sign
+        } else {
+          state.display = "-" + state.display; // Add a minus sign
+        }
+      } else {
+        state.display = "0";
+        state.error = null;
+      }
     },
 
     backspace: (state) => {

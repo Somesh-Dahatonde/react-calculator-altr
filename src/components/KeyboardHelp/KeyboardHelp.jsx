@@ -1,21 +1,21 @@
-import React, { useState, memo, useCallback } from 'react'
-import { Button, Modal, Table } from 'react-bootstrap'
+import React, { useState, memo, useCallback } from "react";
+import { Button, Modal, Table } from "react-bootstrap";
 
 const KeyboardHelp = memo(() => {
-  const [isOpen, setIsOpen] = useState(false)
+  const [isOpen, setIsOpen] = useState(false);
 
-  const handleOpen = useCallback(() => setIsOpen(true), [])
-  const handleClose = useCallback(() => setIsOpen(false), [])
+  const handleOpen = useCallback(() => setIsOpen(true), []);
+  const handleClose = useCallback(() => setIsOpen(false), []);
 
   const shortcuts = [
-    { key: '0-9', description: 'Number input' },
-    { key: '+, -, *, /', description: 'Basic operations' },
-    { key: '.', description: 'Decimal point' },
-    { key: 'Enter or =', description: 'Calculate result' },
-    { key: 'Escape or C', description: 'Clear all' },
-    { key: 'Backspace', description: 'Delete last digit' },
-    { key: '%', description: 'Percent' },
-  ]
+    { key: "0-9", description: "Number input" },
+    { key: "+, -, *, /", description: "Basic operations" },
+    { key: ".", description: "Decimal point" },
+    { key: "Enter or =", description: "Calculate result" },
+    { key: "Escape or C", description: "Clear all" },
+    { key: "Backspace", description: "Delete last digit" },
+    { key: "%", description: "Percent" },
+  ];
 
   return (
     <>
@@ -32,7 +32,8 @@ const KeyboardHelp = memo(() => {
 
       <Modal show={isOpen} onHide={handleClose} centered>
         <Modal.Header closeButton>
-          <Modal.Title>Keyboard Shortcuts</Modal.Title>
+          {/* ✅ Force semantic heading */}
+          <Modal.Title as="h4">Keyboard Shortcuts</Modal.Title>
         </Modal.Header>
         <Modal.Body>
           <Table striped bordered hover>
@@ -45,7 +46,9 @@ const KeyboardHelp = memo(() => {
             <tbody>
               {shortcuts.map((shortcut, index) => (
                 <tr key={index}>
-                  <td><code>{shortcut.key}</code></td>
+                  <td>
+                    <code>{shortcut.key}</code>
+                  </td>
                   <td>{shortcut.description}</td>
                 </tr>
               ))}
@@ -59,9 +62,9 @@ const KeyboardHelp = memo(() => {
         </Modal.Footer>
       </Modal>
     </>
-  )
-})
+  );
+});
 
-KeyboardHelp.displayName = 'KeyboardHelp'
+KeyboardHelp.displayName = "KeyboardHelp";
 
-export default KeyboardHelp
+export default KeyboardHelp;
