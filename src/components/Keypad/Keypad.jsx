@@ -1,6 +1,60 @@
+import { useAppDispatch, useAppSelector } from "../../hooks/hooks";
+import {
+  inputNumber,
+  inputDecimal,
+  inputOperation,
+  calculate,
+  clear,
+  clearEntry,
+  backspace,
+  percent,
+} from "../../features/calculator/calculatorSlice";
+import { selectOperation } from "../../features/calculator/calculatorSelectors";
 import Button from "../Button/Button";
+import { useCallback } from "react";
 
 const Keypad = () => {
+  const dispatch = useAppDispatch();
+  const currentOperation = useAppSelector(selectOperation);
+
+  const handleNumberClick = useCallback(
+    (value) => {
+      dispatch(inputNumber(value));
+    },
+    [dispatch]
+  );
+
+  const handleOperationClick = useCallback(
+    (operation) => {
+      dispatch(inputOperation(operation));
+    },
+    [dispatch]
+  );
+
+  const handleEqualsClick = useCallback(() => {
+    dispatch(calculate());
+  }, [dispatch]);
+
+  const handleClearClick = useCallback(() => {
+    dispatch(clear());
+  }, [dispatch]);
+
+  const handleClearEntryClick = useCallback(() => {
+    dispatch(clearEntry());
+  }, [dispatch]);
+
+  const handleDecimalClick = useCallback(() => {
+    dispatch(inputDecimal());
+  }, [dispatch]);
+
+  // const handleBackspaceClick = useCallback(() => {
+  //   dispatch(backspace());
+  // }, [dispatch]);
+
+  const handlePercentClick = useCallback(() => {
+    dispatch(percent());
+  }, [dispatch]);
+
   return (
     <div className="p-2" style={{ backgroundColor: "#2d2d2d" }}>
       <div className="d-flex justify-content-between mb-2">

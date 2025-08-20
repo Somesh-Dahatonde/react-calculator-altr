@@ -1,8 +1,11 @@
 import { Card } from "react-bootstrap";
 import Display from "../Display/Display";
 import Keypad from "../Keypad/Keypad";
+import useKeyboard from "../../hooks/useKeyboard";
 
 const Calculator = () => {
+  useKeyboard();
+
   return (
     <Card
       className="shadow border-0 mx-auto"

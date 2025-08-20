@@ -12,7 +12,7 @@ const buttonStyles = {
     backgroundColor: "#ff9500",
     color: "#ffffff",
     hoverBg: "#ffaa33",
-    activeBg: "#ff2d2d",
+    activeBg: "#ff2d2d", // red highlight when active
   },
   function: {
     backgroundColor: "#a6a6a6",
