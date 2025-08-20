@@ -3,7 +3,7 @@ import { useAppSelector } from "../../hooks/hooks";
 import { selectDisplayInfo } from "../../features/calculator/calculatorSelectors";
 
 const Display = () => {
-  const { display, error, hasError, isError } =
+  const { display, error, hasError, isError, history } =
     useAppSelector(selectDisplayInfo);
 
   return (
@@ -11,10 +11,12 @@ const Display = () => {
       <Card.Body
         className="py-2 px-4 text-end"
         style={{
-          minHeight: 64,
+          minHeight: 84,
           display: "flex",
+          flexDirection: "column",
           alignItems: "flex-end",
           justifyContent: "flex-end",
+          gap: "4px",
         }}
       >
         <output
@@ -34,6 +36,23 @@ const Display = () => {
             hasError ? `Error: ${error}` : `Calculator display: ${display}`
           }
         >
+          {history && (
+            <div
+              className="text-white-50 small"
+              style={{
+                minHeight: 20,
+                marginBottom: 4,
+                overflow: "hidden",
+                textOverflow: "ellipsis",
+                whiteSpace: "nowrap",
+                width: "100%",
+                textAlign: "right",
+              }}
+            >
+              {history}
+            </div>
+          )}
+
           {display}
         </output>
         {hasError && (

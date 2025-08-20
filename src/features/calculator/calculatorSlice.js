@@ -8,6 +8,7 @@ const initialState = {
   error: null,
   lastInputValue: null,
   lastOperation: null,
+  history: "",
 };
 
 const performCalculation = (prev, current, operation) => {
@@ -55,11 +56,18 @@ const calculatorSlice = createSlice({
 
       if (state.display === "Error") {
         state.display = digit;
+        state.history = "";
         state.waitingForNewValue = false;
         return;
       }
 
       if (state.waitingForNewValue) {
+        // If we're starting a new value after an operation, update history
+        if (state.operation) {
+          if (!state.history) {
+            state.history = state.previousValue + " " + state.operation;
+          }
+        }
         state.display = digit;
         state.waitingForNewValue = false;
       } else {
@@ -106,8 +114,43 @@ const calculatorSlice = createSlice({
         state.display = "Error";
         state.previousValue = null;
         state.operation = null;
+        state.history = "";
         state.waitingForNewValue = true;
         return;
+      }
+
+      // Handle operation input
+      if (
+        state.previousValue !== null &&
+        state.operation &&
+        !state.waitingForNewValue
+      ) {
+        try {
+          // Calculate the result of the previous operation
+          const result = performCalculation(
+            state.previousValue,
+            inputValue,
+            state.operation
+          );
+
+          // Update history and display
+          state.history = `${state.previousValue} ${state.operation} ${inputValue}`;
+          state.display = formatDisplayValue(result);
+          state.previousValue = result;
+        } catch (error) {
+          state.error = error.message;
+          state.display = "Error";
+          state.previousValue = null;
+          state.operation = null;
+          state.waitingForNewValue = true;
+          state.history = "";
+          return;
+        }
+      } else {
+        // First operation or new operation after equals
+        state.previousValue = inputValue;
+        state.history = `${inputValue} ${nextOperation}`;
+        state.display = "0";
       }
 
       if (state.previousValue === null) {
@@ -149,6 +192,7 @@ const calculatorSlice = createSlice({
         state.previousValue = null;
         state.operation = null;
         state.waitingForNewValue = true;
+        state.history = "";
         return;
       }
 
@@ -156,6 +200,9 @@ const calculatorSlice = createSlice({
         try {
           state.lastOperation = state.operation;
           state.lastInputValue = inputValue;
+
+          // Show complete calculation in history
+          state.history = `${state.previousValue} ${state.operation} ${state.display} =`;
 
           const result = performCalculation(
             state.previousValue,
@@ -205,7 +252,10 @@ const calculatorSlice = createSlice({
       }
     },
 
-    clear: () => initialState,
+    clear: (state) => {
+      // Reset all state to initial values
+      Object.assign(state, initialState);
+    },
 
     clearEntry: (state) => {
       if (state.display === "Error") {

@@ -7,6 +7,7 @@ export const selectOperation = (state) => state.calculator.operation;
 export const selectWaitingForNewValue = (state) =>
   state.calculator.waitingForNewValue;
 export const selectError = (state) => state.calculator.error;
+export const selectHistory = (state) => state.calculator.history;
 
 export const selectHasError = createSelector(
   [selectError],
@@ -19,12 +20,13 @@ export const selectIsCalculating = createSelector(
 );
 
 export const selectDisplayInfo = createSelector(
-  [selectDisplay, selectError, selectHasError],
-  (display, error, hasError) => ({
+  [selectDisplay, selectError, selectHasError, selectHistory],
+  (display, error, hasError, history) => ({
     display,
     error,
     hasError,
     isError: display === "Error",
+    history,
   })
 );
 
