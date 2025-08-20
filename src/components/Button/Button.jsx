@@ -2,6 +2,12 @@ import { memo, useState } from "react";
 import { Button as BootstrapButton } from "react-bootstrap";
 
 const buttonStyles = {
+  digit: {
+    backgroundColor: "#505050",
+    color: "#ffffff",
+    hoverBg: "#606060",
+    activeBg: "#404040",
+  },
   default: {
     backgroundColor: "#505050",
     color: "#ffffff",
@@ -15,8 +21,8 @@ const buttonStyles = {
     activeBg: "#ff2d2d", // red highlight when active
   },
   function: {
-    backgroundColor: "#a6a6a6",
-    color: "#000000",
+    backgroundColor: "#3d3d3d",
+    color: "#fff",
     hoverBg: "#b6b6b6",
     activeBg: "#969696",
   },
@@ -92,14 +98,15 @@ const Button = memo(
           backgroundColor: bgColor,
           color: style.color,
           border: "none",
-          borderRadius: "8px",
-          fontSize: "1.5rem",
+          borderRadius: 0,
+          fontSize: "1.6rem",
           fontWeight: variant === "function" ? 500 : 400,
-          width: size === "wide" ? "100%" : "64px",
-          height: "56px",
-          margin: "4px",
+          width: "100%",
+          height: "70px",
+          margin: 0,
           transition: "all 0.15s ease",
-          transform: isPressed ? "scale(0.95)" : "scale(1)",
+          transform: isPressed ? "scale(0.97)" : "scale(1)",
+          gridColumn: props.spanValue,
         }}
         {...props}
       >

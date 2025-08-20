@@ -8,15 +8,26 @@ const Display = () => {
 
   return (
     <Card className="border-0 rounded-0" style={{ backgroundColor: "#2d2d2d" }}>
-      <Card.Body className="py-3 px-3 text-end">
+      <Card.Body
+        className="py-2 px-4 text-end"
+        style={{
+          minHeight: 64,
+          display: "flex",
+          alignItems: "flex-end",
+          justifyContent: "flex-end",
+        }}
+      >
         <output
-          className={`fs-1 fw-light ${isError ? "text-danger" : "text-white"}`}
+          className={`fw-light ${isError ? "text-danger" : "text-white"}`}
           style={{
             display: "block",
             width: "100%",
+            fontSize: "2.5rem",
             overflow: "hidden",
             textOverflow: "ellipsis",
             whiteSpace: "nowrap",
+            lineHeight: 1.1,
+            minHeight: 48,
           }}
           aria-live="polite"
           aria-label={
