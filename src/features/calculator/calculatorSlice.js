@@ -26,8 +26,6 @@ const performCalculation = (prev, current, operation) => {
         throw new Error("Cannot divide by zero");
       }
       return prevNum / currentNum;
-    case "%":
-      return prevNum * (currentNum / 100);
     default:
       return currentNum;
   }
@@ -41,6 +39,7 @@ const formatDisplayValue = (value) => {
     ) {
       return value.toExponential(6);
     }
+    // Trim trailing zeros from decimals
     return parseFloat(value.toPrecision(10)).toString();
   }
   return value.toString();
@@ -53,6 +52,7 @@ const calculatorSlice = createSlice({
     inputNumber: (state, action) => {
       const digit = action.payload;
       state.error = null;
+
       if (state.display === "Error") {
         state.display = digit;
         state.waitingForNewValue = false;
@@ -65,6 +65,9 @@ const calculatorSlice = createSlice({
       } else {
         if (state.display === "0" && digit !== ".") {
           state.display = digit;
+        } else if (state.display === "-0") {
+          // Fix: replace with proper negative digit, not "(-5)"
+          state.display = "-" + digit;
         } else {
           if (state.display.length < 15) {
             state.display = state.display + digit;
@@ -76,7 +79,6 @@ const calculatorSlice = createSlice({
     inputDecimal: (state) => {
       state.error = null;
 
-      // Reset if display shows error
       if (state.display === "Error") {
         state.display = "0.";
         state.waitingForNewValue = false;
@@ -86,10 +88,9 @@ const calculatorSlice = createSlice({
       if (state.waitingForNewValue) {
         state.display = "0.";
         state.waitingForNewValue = false;
-      } else if (state.display.indexOf(".") === -1) {
-        // Only add decimal if display length allows
+      } else if (!state.display.includes(".")) {
         if (state.display.length < 14) {
-          state.display = state.display + ".";
+          state.display += ".";
         }
       }
     },
@@ -98,14 +99,8 @@ const calculatorSlice = createSlice({
       const nextOperation = action.payload;
       const inputValue = parseFloat(state.display);
 
-      state.error = null;
+      if (state.display === "Error") return;
 
-      // Handle error state
-      if (state.display === "Error") {
-        return;
-      }
-
-      // Validate input value
       if (isNaN(inputValue)) {
         state.error = "Invalid input";
         state.display = "Error";
@@ -125,10 +120,7 @@ const calculatorSlice = createSlice({
             state.operation
           );
 
-          // Check for invalid results
-          if (!isFinite(result)) {
-            throw new Error("Result is too large");
-          }
+          if (!isFinite(result)) throw new Error("Result is too large");
 
           state.display = formatDisplayValue(result);
           state.previousValue = result;
@@ -149,16 +141,8 @@ const calculatorSlice = createSlice({
     calculate: (state) => {
       const inputValue = parseFloat(state.display);
 
-      // We need to store these values in the state for repeat functionality
-      if (!state.lastInputValue) state.lastInputValue = null;
-      if (!state.lastOperation) state.lastOperation = null;
+      if (state.display === "Error") return;
 
-      // Handle error state
-      if (state.display === "Error") {
-        return;
-      }
-
-      // Validate input
       if (isNaN(inputValue)) {
         state.error = "Invalid input";
         state.display = "Error";
@@ -170,7 +154,6 @@ const calculatorSlice = createSlice({
 
       if (state.previousValue !== null && state.operation) {
         try {
-          // Store the current operation and right operand for repeat functionality
           state.lastOperation = state.operation;
           state.lastInputValue = inputValue;
 
@@ -180,13 +163,10 @@ const calculatorSlice = createSlice({
             state.operation
           );
 
-          // Check for invalid results
-          if (!isFinite(result)) {
-            throw new Error("Result is too large");
-          }
+          if (!isFinite(result)) throw new Error("Result is too large");
 
           state.display = formatDisplayValue(result);
-          state.previousValue = result; // Keep the result for chained operations
+          state.previousValue = result;
           state.operation = null;
           state.waitingForNewValue = true;
           state.error = null;
@@ -200,7 +180,6 @@ const calculatorSlice = createSlice({
           state.lastInputValue = null;
         }
       } else if (state.lastOperation && state.lastInputValue !== null) {
-        // Handle repeated equals press
         try {
           const result = performCalculation(
             parseFloat(state.display),
@@ -208,10 +187,7 @@ const calculatorSlice = createSlice({
             state.lastOperation
           );
 
-          // Check for invalid results
-          if (!isFinite(result)) {
-            throw new Error("Result is too large");
-          }
+          if (!isFinite(result)) throw new Error("Result is too large");
 
           state.display = formatDisplayValue(result);
           state.previousValue = result;
@@ -229,40 +205,20 @@ const calculatorSlice = createSlice({
       }
     },
 
-    clear: (state) => {
-      Object.assign(state, initialState);
-    },
+    clear: () => initialState,
 
     clearEntry: (state) => {
-      // If the display is showing an error, clear it
       if (state.display === "Error") {
         state.display = "0";
         state.error = null;
         return;
       }
-
-      // If waiting for a new value after an operation, just clear the entry
-      if (state.waitingForNewValue === false && state.operation) {
-        state.display = "0";
-        return;
-      }
-
-      // Toggle sign (plus/minus functionality)
-      if (state.display !== "0") {
-        // If the current display is not "0", toggle the sign
-        if (state.display.startsWith("-")) {
-          state.display = state.display.substring(1); // Remove the minus sign
-        } else {
-          state.display = "-" + state.display; // Add a minus sign
-        }
-      } else {
-        state.display = "0";
-        state.error = null;
-      }
+      state.display = "0";
+      state.error = null;
     },
 
     backspace: (state) => {
-      if (state.display.length > 1 && state.display !== "Error") {
+      if (state.display !== "Error" && state.display.length > 1) {
         state.display = state.display.slice(0, -1);
       } else {
         state.display = "0";
@@ -271,10 +227,7 @@ const calculatorSlice = createSlice({
     },
 
     percent: (state) => {
-      // Handle error state
-      if (state.display === "Error") {
-        return;
-      }
+      if (state.display === "Error") return;
 
       const currentValue = parseFloat(state.display);
       if (!isNaN(currentValue) && isFinite(currentValue)) {
@@ -291,6 +244,18 @@ const calculatorSlice = createSlice({
         state.display = "Error";
       }
     },
+
+    toggleSign: (state) => {
+      if (state.display === "Error") return;
+
+      if (state.display.startsWith("-")) {
+        state.display = state.display.slice(1);
+      } else if (state.display !== "0") {
+        state.display = "-" + state.display;
+      } else {
+        state.display = "-0";
+      }
+    },
   },
 });
 
@@ -303,6 +268,7 @@ export const {
   clearEntry,
   backspace,
   percent,
+  toggleSign,
 } = calculatorSlice.actions;
 
 export default calculatorSlice.reducer;

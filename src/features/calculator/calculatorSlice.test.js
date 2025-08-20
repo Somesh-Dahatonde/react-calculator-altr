@@ -9,6 +9,7 @@ import calculatorReducer, {
   percent,
   backspace,
   clearEntry,
+  toggleSign,
 } from "./calculatorSlice";
 
 // Helper function to create a test store
@@ -166,14 +167,26 @@ describe("Calculator Additional Tests", () => {
 
   test("should toggle sign with +/- button", () => {
     store.dispatch(inputNumber("5"));
-    store.dispatch(clearEntry()); // clearEntry is also used for +/- functionality
+    store.dispatch(toggleSign());
 
     const state = store.getState().calculator;
     expect(state.display).toBe("-5");
 
-    store.dispatch(clearEntry()); // Toggle again
+    store.dispatch(toggleSign()); // Toggle again
     const toggledState = store.getState().calculator;
     expect(toggledState.display).toBe("5");
+  });
+
+  test("should allow negative zero input with +/- button", () => {
+    // Starting with "0" and toggling sign
+    store.dispatch(toggleSign());
+    const negZeroState = store.getState().calculator;
+    expect(negZeroState.display).toBe("-0");
+
+    // Now entering a digit should maintain the negative sign
+    store.dispatch(inputNumber("5"));
+    const negValueState = store.getState().calculator;
+    expect(negValueState.display).toBe("-5");
   });
 
   test("should handle multiple decimal inputs correctly", () => {

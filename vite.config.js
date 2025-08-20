@@ -11,13 +11,13 @@ export default defineConfig({
     coverage: {
       reporter: ["text", "html"],
       exclude: [
-        "node_modules/**", 
+        "node_modules/**",
         "src/setupTests.js",
         "dist/**",
         "eslint.config.js",
         "vite.config.js",
         "src/main.jsx",
-        "src/App.jsx"
+        "src/App.jsx",
       ],
       lines: 80,
       functions: 80,

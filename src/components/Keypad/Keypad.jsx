@@ -7,6 +7,7 @@ import {
   clear,
   clearEntry,
   percent,
+  toggleSign,
 } from "../../features/calculator/calculatorSlice";
 import { selectOperation } from "../../features/calculator/calculatorSelectors";
 import Button from "../Button/Button";
@@ -43,7 +44,7 @@ const Keypad = () => {
       <Button variant="function" onClick={() => dispatch(clear())}>
         AC
       </Button>
-      <Button variant="function" onClick={() => dispatch(clearEntry())}>
+      <Button variant="function" onClick={() => dispatch(toggleSign())}>
         +/−
       </Button>
       <Button variant="function" onClick={() => dispatch(percent())}>
